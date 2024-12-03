@@ -1,8 +1,8 @@
 name: Build and push Docker image
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -22,10 +22,10 @@ jobs:
       - name: Build and tag Docker image
         run: |
           DOCKER_BUILDKIT=1 docker build -t "${{ env.IMAGE_NAME }}:latest" .
-          APP_VERSION="$(docker inspect --format='{{index .Config.Labels "version"}}' ${{ env.IMAGE_NAME }})"
+          APP_VERSION="${{ github.ref }}"
           docker tag "${{ env.IMAGE_NAME }}:latest" "${{ env.IMAGE_NAME }}:${APP_VERSION}"
       - name: Push Docker image
         run: |
-          APP_VERSION="$(docker inspect --format='{{index .Config.Labels "version"}}' ${{ env.IMAGE_NAME }})"
+          APP_VERSION="${{ github.ref }}"
           docker push "${{ env.IMAGE_NAME }}:${APP_VERSION}"
           docker push "${{ env.IMAGE_NAME }}:latest"
