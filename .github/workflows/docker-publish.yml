@@ -19,13 +19,19 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-      - name: Build and tag Docker image
-        run: |
-          DOCKER_BUILDKIT=1 docker build -t "${{ env.IMAGE_NAME }}:latest" .
-          APP_VERSION="${{ github.ref }}"
-          docker tag "${{ env.IMAGE_NAME }}:latest" "${{ env.IMAGE_NAME }}:${APP_VERSION}"
-      - name: Push Docker image
-        run: |
-          APP_VERSION="${{ github.ref }}"
-          docker push "${{ env.IMAGE_NAME }}:${APP_VERSION}"
-          docker push "${{ env.IMAGE_NAME }}:latest"
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
