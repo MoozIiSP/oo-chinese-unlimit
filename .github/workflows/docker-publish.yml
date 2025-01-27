@@ -6,7 +6,7 @@ on:
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  IMAGE_NAME: stackzhao/oo-chinese
+  IMAGE_NAME: mooziisp/oo-chinese
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
